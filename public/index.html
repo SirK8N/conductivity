@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CONDUCTIVITY</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top Minimal Bar: Brand & Obsidian-style Vault Controls -->
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-title">CONDUCTIVITY</span>
+      <span id="vault-indicator" class="vault-path" title="Current Local Vault Folder">./vault</span>
+    </div>
+    <div class="vault-actions">
+      <button id="btn-top-recurring" class="btn-ghost" title="Manage Recurring Tasks">&#x21bb; Recurring</button>
+      <button id="btn-theme-toggle" class="btn-ghost" title="Toggle Light / Dark Mode">☀ Light</button>
+      <button id="btn-change-vault" class="btn-ghost" title="Select local folder for Vault persistence">Vault Folder</button>
+      <button id="btn-export-vault" class="btn-ghost" title="Export Vault as JSON file">Export</button>
+      <label class="btn-ghost file-label" title="Import Vault JSON file">
+        Import
+        <input type="file" id="input-import-vault" accept=".json" hidden />
+      </label>
+    </div>
+  </header>
+
+  <!-- Main Content Area (4 Sections) -->
+  <main class="main-stage">
+
+    <!-- ==================== SECTION 0: STICKY NOTES ==================== -->
+    <section id="section-stickies" class="view-section">
+      <div id="sticky-arena" class="sticky-arena">
+        <div class="sticky-board-header">
+          <div class="sticky-board-title">
+            <span class="corner-tag">00</span>
+            <span class="corner-name">STICKY NOTES // IDEA BOARD</span>
+          </div>
+          <span class="sticky-board-hint">Ideas that aren't goals yet &bull; Drag freely (static size) &bull; Click a note to edit or turn into a task</span>
+        </div>
+
+        <button id="btn-add-sticky" class="btn-add-task" title="Add Sticky Note (+)">+</button>
+
+        <div id="sticky-nodes" class="sticky-nodes"></div>
+      </div>
+
+      <!-- Sticky Note Inspector / Edit Popover -->
+      <div id="sticky-popover" class="popover sticky-popover hidden">
+        <div class="popover-header">
+          <input type="text" id="sticky-pop-title" class="input-clean" placeholder="Idea title..." />
+          <button id="sticky-pop-close" class="btn-icon">&times;</button>
+        </div>
+        <label class="field-label">Color</label>
+        <div id="sticky-pop-colors" class="sticky-color-row">
+          <button type="button" class="sticky-color-swatch" data-color="yellow" title="Warm Yellow"></button>
+          <button type="button" class="sticky-color-swatch" data-color="amber" title="Amber"></button>
+          <button type="button" class="sticky-color-swatch" data-color="mint" title="Mint"></button>
+          <button type="button" class="sticky-color-swatch" data-color="sky" title="Sky"></button>
+          <button type="button" class="sticky-color-swatch" data-color="lavender" title="Lavender"></button>
+          <button type="button" class="sticky-color-swatch" data-color="rose" title="Rose"></button>
+        </div>
+        <label class="field-label">Idea / Note Details</label>
+        <textarea id="sticky-pop-content" class="textarea-clean" rows="4" placeholder="Jot down thoughts, brainstorms, or rough ideas..."></textarea>
+        <div class="popover-actions">
+          <button id="sticky-pop-convert" class="btn-primary">Turn into Task &rarr;</button>
+          <button id="sticky-pop-delete" class="btn-danger">Delete</button>
+        </div>
+      </div>
+
+      <!-- Add Sticky Note Modal -->
+      <div id="modal-add-sticky" class="modal-backdrop hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3>NEW STICKY NOTE</h3>
+            <button id="modal-sticky-close" class="btn-icon">&times;</button>
+          </div>
+          <form id="form-add-sticky">
+            <label class="field-label">Idea Headline</label>
+            <input type="text" id="new-sticky-title" class="input-clean" placeholder="Quick idea or thought..." required />
+
+            <label class="field-label">Color</label>
+            <div id="new-sticky-colors" class="sticky-color-row">
+              <button type="button" class="sticky-color-swatch active" data-color="yellow" title="Warm Yellow"></button>
+              <button type="button" class="sticky-color-swatch" data-color="amber" title="Amber"></button>
+              <button type="button" class="sticky-color-swatch" data-color="mint" title="Mint"></button>
+              <button type="button" class="sticky-color-swatch" data-color="sky" title="Sky"></button>
+              <button type="button" class="sticky-color-swatch" data-color="lavender" title="Lavender"></button>
+              <button type="button" class="sticky-color-swatch" data-color="rose" title="Rose"></button>
+            </div>
+
+            <label class="field-label">Details / Notes</label>
+            <textarea id="new-sticky-content" class="textarea-clean" rows="4" placeholder="Capture context, sketches, or notes..."></textarea>
+
+            <div class="modal-footer">
+              <button type="button" id="modal-sticky-cancel" class="btn-secondary">Cancel</button>
+              <button type="submit" class="btn-primary">Create Sticky Note</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 1: PRIORITY MATRIX ==================== -->
+    <section id="section-matrix" class="view-section active">
+      <div id="matrix-arena" class="matrix-arena">
+        <!-- Subtle Center Bullseye & Axis Lines -->
+        <div class="matrix-axis-h"></div>
+        <div class="matrix-axis-v"></div>
+        <div class="matrix-center-ring ring-outer"></div>
+        <div class="matrix-center-ring ring-inner"></div>
+        <div class="matrix-center-label">GRAVITY CENTER</div>
+
+        <!-- 4 Corners Labels -->
+        <div class="corner-label top-left">
+          <span class="corner-tag">I</span>
+          <span class="corner-name">URGENT &amp; IMPORTANT</span>
+        </div>
+        <div class="corner-label top-right">
+          <span class="corner-tag">II</span>
+          <span class="corner-name">IMPORTANT / NOT URGENT</span>
+        </div>
+        <div class="corner-label bottom-left">
+          <span class="corner-tag">III</span>
+          <span class="corner-name">URGENT / NOT IMPORTANT</span>
+        </div>
+        <div class="corner-label bottom-right">
+          <span class="corner-tag">IV</span>
+          <span class="corner-name">LOW PRIORITY / ARCHIVE</span>
+        </div>
+
+        <!-- Top-Right Action Controls: Recurring Tasks Menu & Add Task -->
+        <button id="btn-open-recurring" class="btn-recurring-matrix" title="Manage Recurring Tasks">
+          <span>&#x21bb;</span>
+          <span>RECURRING</span>
+          <span id="recurring-count-badge" class="count-pill">0</span>
+        </button>
+        <button id="btn-add-task" class="btn-add-task" title="Add Task (+)">+</button>
+
+        <!-- Time / Aging Simulation Controls (Bottom-Left of Matrix) -->
+        <div class="sim-controls">
+          <span id="sim-days-label" class="sim-label">Age Offset: +0.0d</span>
+          <button id="btn-sim-day" class="btn-mini" title="Simulate 1 day passing (tasks age, drift toward center, &amp; trigger due recurring tasks)">+1 Day</button>
+          <button id="btn-sim-reset" class="btn-mini" title="Reset simulated day offset">Reset</button>
+        </div>
+
+        <!-- Dynamic Task Nodes Rendered Here -->
+        <div id="matrix-nodes" class="matrix-nodes"></div>
+      </div>
+
+      <!-- Task Inspector / Edit Popover -->
+      <div id="task-popover" class="popover hidden">
+        <div class="popover-header">
+          <input type="text" id="pop-title" class="input-clean" placeholder="Task title..." />
+          <button id="pop-close" class="btn-icon">&times;</button>
+        </div>
+        <div class="popover-meta" id="pop-meta">Age: 0.0d &bull; Focused: 0m</div>
+        <label class="field-label">Recurrence</label>
+        <select id="pop-recurrence" class="select-clean">
+          <option value="none">One-off Task (No Recurrence)</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+        <label class="field-label">Notes</label>
+        <textarea id="pop-notes" class="textarea-clean" rows="3" placeholder="Write task notes..."></textarea>
+        <div class="popover-actions">
+          <button id="pop-complete" class="btn-primary">Complete &rarr; Marble</button>
+          <button id="pop-focus" class="btn-secondary">Focus Timer</button>
+          <button id="pop-delete" class="btn-danger">Delete</button>
+        </div>
+      </div>
+
+      <!-- Add Task Modal -->
+      <div id="modal-add" class="modal-backdrop hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3 id="modal-add-heading">NEW TASK</h3>
+            <button id="modal-close" class="btn-icon">&times;</button>
+          </div>
+          <div id="convert-sticky-banner" class="convert-banner hidden">
+            Converting Sticky Note into a Priority Matrix Task
+          </div>
+          <form id="form-add-task">
+            <label class="field-label">Task Title</label>
+            <input type="text" id="new-title" class="input-clean" placeholder="What needs to be done?" required autofocus />
+
+            <div class="form-row">
+              <div>
+                <label class="field-label">Starting Quadrant</label>
+                <select id="new-quadrant" class="select-clean">
+                  <option value="tl">Top-Left (Urgent &amp; Important)</option>
+                  <option value="tr">Top-Right (Important / Not Urgent)</option>
+                  <option value="bl">Bottom-Left (Urgent / Not Important)</option>
+                  <option value="br">Bottom-Right (Low Priority)</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label">Full Aging Cycle (Days)</label>
+                <input type="number" id="new-max-days" class="input-clean" value="7" min="1" max="365" />
+              </div>
+            </div>
+
+            <label class="field-label">Recurrence Schedule</label>
+            <select id="new-recurrence" class="select-clean">
+              <option value="none">One-off Task (Does not repeat)</option>
+              <option value="daily">Daily (Every day)</option>
+              <option value="weekly">Weekly (Every 7 days)</option>
+              <option value="monthly">Monthly (Every month)</option>
+              <option value="yearly">Yearly (Every year)</option>
+            </select>
+
+            <label class="field-label">Initial Notes</label>
+            <textarea id="new-notes" class="textarea-clean" rows="3" placeholder="Optional context or steps..."></textarea>
+
+            <div class="modal-footer">
+              <button type="button" id="modal-cancel" class="btn-secondary">Cancel</button>
+              <button type="submit" id="modal-add-submit" class="btn-primary">Create Task</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 2: MARBLE JAR ==================== -->
+    <section id="section-jar" class="view-section">
+      <div class="jar-layout">
+        <!-- Left/Center: Interactive Marble Jar Canvas -->
+        <div id="jar-dropzone" class="jar-stage">
+          <div class="jar-header-info">
+            <span id="jar-count-label">0 MARBLES IN JAR</span>
+            <span class="jar-hint">Hover a marble to view memory &bull; Drag completed tasks into the jar opening</span>
+          </div>
+          <canvas id="jar-canvas"></canvas>
+          <!-- Hover Tooltip Pop-up -->
+          <div id="marble-tooltip" class="marble-tooltip hidden"></div>
+        </div>
+
+        <!-- Right: Completed Tasks & Marble Memory Editor -->
+        <aside class="jar-sidebar">
+          <div class="sidebar-block">
+            <h3 class="block-title">READY TO DROP <span id="ready-count" class="count-pill">0</span></h3>
+            <p class="block-sub">Completed tasks from the Priority Matrix. Select one to write a memory, then drag or drop it into the jar.</p>
+            <div id="ready-marbles-list" class="marble-list"></div>
+          </div>
+
+          <div id="marble-editor" class="sidebar-block editor-block hidden">
+            <div class="editor-header">
+              <span id="marble-editor-dot" class="marble-dot"></span>
+              <h4 id="marble-editor-title">Task Title</h4>
+            </div>
+            <div id="marble-editor-date" class="meta-line">Completed today</div>
+
+            <label class="field-label">Memory / Thoughts on Completion</label>
+            <textarea id="marble-memory-input" class="textarea-clean" rows="4" placeholder="Write a memory, reflection, or thoughts about completing this task..."></textarea>
+
+            <label class="field-label">Task Notes</label>
+            <textarea id="marble-notes-input" class="textarea-clean" rows="3" placeholder="Task notes..."></textarea>
+
+            <div class="editor-actions">
+              <button id="btn-drop-marble" class="btn-primary">Drop into Jar &darr;</button>
+              <button id="btn-return-matrix" class="btn-ghost" title="Send back to Priority Matrix">Reopen Task</button>
+            </div>
+          </div>
+
+          <div class="sidebar-block">
+            <h3 class="block-title">JAR ARCHIVE <span id="archive-count" class="count-pill">0</span></h3>
+            <div id="jarred-marbles-list" class="marble-list compact"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 3: FOCUS TIMER & NOTES ==================== -->
+    <section id="section-focus" class="view-section">
+      <div class="focus-layout">
+        <!-- Left: Focus Timer Panel -->
+        <div class="focus-timer-panel">
+          <div class="task-selector-bar">
+            <label class="field-label">ACTIVE FOCUS TASK</label>
+            <select id="focus-task-select" class="select-clean large"></select>
+          </div>
+
+          <div id="focus-task-stats" class="focus-stats-bar">
+            <div class="stat-box">
+              <span class="stat-label">TOTAL ACCUMULATED TIME</span>
+              <span id="focus-total-time" class="stat-value">00h 00m 00s</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">TASK STATUS</span>
+              <span id="focus-task-status" class="stat-value">Active</span>
+            </div>
+          </div>
+
+          <div class="timer-display-card">
+            <div class="timer-presets">
+              <button class="preset-btn active" data-minutes="25">25m</button>
+              <button class="preset-btn" data-minutes="50">50m</button>
+              <button class="preset-btn" data-minutes="15">15m</button>
+              <button class="preset-btn" data-minutes="0">Stopwatch</button>
+            </div>
+
+            <div id="timer-readout" class="timer-readout">25:00</div>
+            <div id="timer-session-sub" class="timer-sub">Session elapsed: 0m 00s</div>
+
+            <div class="timer-controls">
+              <button id="btn-timer-toggle" class="btn-primary btn-large">START FOCUS</button>
+              <button id="btn-timer-reset" class="btn-secondary">RESET</button>
+              <button id="btn-focus-complete" class="btn-ghost">Complete Task &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Task Notes Panel -->
+        <div class="focus-notes-panel">
+          <div class="notes-header">
+            <h3 id="focus-notes-title">TASK NOTES</h3>
+            <span id="notes-save-status" class="save-badge">Saved to Vault</span>
+          </div>
+          <textarea id="focus-notes-area" class="notes-editor" placeholder="Select a task to view and write persistent notes..."></textarea>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Recurring Tasks Management Modal -->
+  <div id="modal-recurring" class="modal-backdrop hidden">
+    <div class="modal-card modal-wide">
+      <div class="modal-header">
+        <h3>&#x21bb; RECURRING TASKS MANAGER</h3>
+        <button id="modal-recurring-close" class="btn-icon">&times;</button>
+      </div>
+
+      <div class="recurring-manager-layout">
+        <!-- Left: Active Recurring Task Rules -->
+        <div class="recurring-list-col">
+          <div class="block-title">
+            <span>CONFIGURED RECURRING GOALS</span>
+            <span id="recurring-total-pill" class="count-pill">0</span>
+          </div>
+          <div id="recurring-rules-list" class="recurring-rules-list"></div>
+        </div>
+
+        <!-- Right: Create / Edit Recurring Task Rule -->
+        <div class="recurring-form-col">
+          <div class="block-title">
+            <span id="recurring-form-heading">CREATE RECURRING GOAL</span>
+            <button type="button" id="btn-recurring-form-reset" class="btn-mini hidden">New</button>
+          </div>
+          <form id="form-recurring-task">
+            <input type="hidden" id="rec-edit-id" value="" />
+            <label class="field-label">Goal / Task Title</label>
+            <input type="text" id="rec-title" class="input-clean" placeholder="e.g., Weekly review, Daily workout..." required />
+
+            <div class="form-row">
+              <div>
+                <label class="field-label">Frequency</label>
+                <select id="rec-frequency" class="select-clean">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label">Aging Cycle (Days)</label>
+                <input type="number" id="rec-max-days" class="input-clean" value="7" min="1" max="365" />
+              </div>
+            </div>
+
+            <label class="field-label">Starting Quadrant</label>
+            <select id="rec-quadrant" class="select-clean">
+              <option value="tl">Top-Left (Urgent &amp; Important)</option>
+              <option value="tr">Top-Right (Important / Not Urgent)</option>
+              <option value="bl">Bottom-Left (Urgent / Not Important)</option>
+              <option value="br">Bottom-Right (Low Priority)</option>
+            </select>
+
+            <label class="field-label">Default Notes</label>
+            <textarea id="rec-notes" class="textarea-clean" rows="3" placeholder="Template notes for each spawned task..."></textarea>
+
+            <label class="checkbox-row" id="rec-spawn-now-row">
+              <input type="checkbox" id="rec-spawn-now" checked />
+              <span>Spawn an active task in Priority Matrix immediately</span>
+            </label>
+
+            <div class="modal-footer">
+              <button type="submit" id="rec-submit-btn" class="btn-primary">Save Recurring Goal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Central Bottom Navigation Bar -->
+  <nav class="bottom-dock" aria-label="Main Navigation">
+    <button class="dock-btn" data-target="section-stickies">
+      <span class="dock-index">00</span>
+      <span class="dock-label">STICKY NOTES</span>
+      <span id="dock-stickies-badge" class="dock-badge hidden">0</span>
+    </button>
+    <button class="dock-btn active" data-target="section-matrix">
+      <span class="dock-index">01</span>
+      <span class="dock-label">PRIORITY MATRIX</span>
+    </button>
+    <button class="dock-btn" data-target="section-jar">
+      <span class="dock-index">02</span>
+      <span class="dock-label">MARBLE JAR</span>
+      <span id="dock-jar-badge" class="dock-badge hidden">0</span>
+    </button>
+    <button class="dock-btn" data-target="section-focus">
+      <span class="dock-index">03</span>
+      <span class="dock-label">FOCUS &amp; NOTES</span>
+      <span id="dock-timer-dot" class="timer-live-dot hidden"></span>
+    </button>
+  </nav>
+
+  <!-- In-App Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
