@@ -1,6 +1,6 @@
 {
   "name": "conductivity",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Conductivity",
   "description": "Minimalist 3-in-1 productivity app (Priority Matrix, Marble Jar, Focus Timer)",
   "main": "main.js",
